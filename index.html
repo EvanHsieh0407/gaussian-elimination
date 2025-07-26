@@ -7,7 +7,7 @@
     body { font-family: Arial, sans-serif; padding: 20px; }
     textarea { width: 100%; height: 120px; }
     button { margin: 10px 0; padding: 10px; }
-    pre { background: #f0f0f0; padding: 10px; }
+    pre { background: #f0f0f0; padding: 10px; white-space: pre-wrap; }
   </style>
 </head>
 <body>
@@ -31,12 +31,15 @@
       }
     }
 
+    function formatMatrix(matrix) {
+      return matrix.map(row => "[" + row.map(num => String(Number(num).toFixed(6))).join(", ") + "]").join("\n");
+    }
+
     function gaussianElimination() {
       let A = parseMatrixInput();
       if (!A) return;
       const n = A.length;
       for (let i = 0; i < n; i++) {
-        // 選主元
         let maxRow = i;
         for (let k = i + 1; k < n; k++) {
           if (Math.abs(A[k][i]) > Math.abs(A[maxRow][i])) {
@@ -45,14 +48,12 @@
         }
         [A[i], A[maxRow]] = [A[maxRow], A[i]];
 
-        // 將主元變成1
         const pivot = A[i][i];
         if (pivot === 0) continue;
         for (let j = i; j < A[i].length; j++) {
           A[i][j] /= pivot;
         }
 
-        // 消去其他列
         for (let k = 0; k < n; k++) {
           if (k !== i) {
             const factor = A[k][i];
@@ -63,11 +64,10 @@
         }
       }
 
-      // 解向量
-      const solution = A.map(row => row[row.length - 1]);
+      const solution = A.map(row => Number(row[row.length - 1].toFixed(6)));
       document.getElementById("output").textContent =
-        "上三角矩陣 (簡化列階梯)：\n" + JSON.stringify(A, null, 2) +
-        "\n\n解向量：\n" + JSON.stringify(solution);
+        "上三角矩陣（簡化列階梯）：\n" + formatMatrix(A) +
+        "\n\n解向量：\n[" + solution.join(", ") + "]";
     }
 
     function inverseMatrix() {
@@ -79,15 +79,12 @@
         return;
       }
 
-      // 建立增廣矩陣 [A | I]
       let I = Array.from({ length: n }, (_, i) =>
         Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))
       );
       let augmented = A.map((row, i) => row.concat(I[i]));
 
-      // 高斯消去法
       for (let i = 0; i < n; i++) {
-        // 選主元
         let maxRow = i;
         for (let k = i + 1; k < n; k++) {
           if (Math.abs(augmented[k][i]) > Math.abs(augmented[maxRow][i])) {
@@ -102,12 +99,10 @@
           return;
         }
 
-        // 主元化為1
         for (let j = 0; j < augmented[0].length; j++) {
           augmented[i][j] /= pivot;
         }
 
-        // 消去其他列
         for (let k = 0; k < n; k++) {
           if (k !== i) {
             const factor = augmented[k][i];
@@ -118,11 +113,13 @@
         }
       }
 
-      // 提取右半邊為反矩陣
       const inverse = augmented.map(row => row.slice(n));
       document.getElementById("output").textContent =
-        "反矩陣為：\n" + JSON.stringify(inverse, null, 2);
+        "反矩陣為：\n" + formatMatrix(inverse);
     }
   </script>
 </body>
 </html>
+
+
+
